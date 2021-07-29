@@ -17,4 +17,4 @@ ARG JAR_FILE=$PWD/target/*.jar
 ADD ${JAR_FILE} spring-petclinic-service.jar
  
 # Run the jar file 
-ENTRYPOINT ["java","-Dserver.port=8080","-Djava.security.egd=file:/dev/./urandom","-jar","/spring-petclinic-service.jar"]
+ENTRYPOINT ["java","-Dserver.port=8080","-Dspring.profiles.active=default","-jar","/spring-petclinic-service.jar"]
