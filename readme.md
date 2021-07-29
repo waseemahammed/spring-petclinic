@@ -2,6 +2,8 @@ Pipeline Jenkinsfile : https://github.com/waseemahammed/spring-petclinic/blob/ma
 
 Dockerfile : https://github.com/waseemahammed/spring-petclinic/blob/main/Dockerfile
 
+Docker image : https://hub.docker.com/repository/docker/waseemahammed/codepairing
+
 Deployed to K8s : 
 
 <img width="1791" alt="Screenshot 2021-07-29 at 2 13 01 PM" src="https://user-images.githubusercontent.com/23531917/127461021-b1c04447-2599-4571-9a3a-532045914294.png">
