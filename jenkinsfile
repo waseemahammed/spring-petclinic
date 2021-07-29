@@ -26,11 +26,6 @@ pipeline {
                 }
             }
         }
-        stage("Load K8s manifest"){
-            steps{
-                writeFile(file:'kube.yaml', text:('kube.yaml'))
-            }
-        }
         stage("Build docker image and Push to repo"){
             environment {
                 DOCKER_IMAGE_NAME = "waseemahammed/codepairing"
