@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+ name: test
+ labels:
+   name: test
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-service
+  namespace: test
+  labels:
+    app: test-app
+spec:
+  type: ClusterIP
+  selector:
+    app: test-app
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+    name: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-deployment
+  namespace: test
+  labels:
+    app: test-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-app
+  template:
+    metadata:
+      labels:
+        app: test-app
+    spec:
+      containers:
+      - name: test
+        image: $DOCKER_IMAGE_NAME:$IMAGE_TAG
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 128
+            memory: 128
+          limits:
+            cpu: 512
+            memory: 512          
+        livenessProbe: 
+          httpGet: 
+            path: /
+            port: 8080 
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 30 
+        readinessProbe: 
+          httpGet: 
+            path: /
+            port: 8080 
+          initialDelaySeconds: 30 
+          periodSeconds: 10 
+          failureThreshold: 5
+          timeoutSeconds: 30 
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: api-ingress-test
+  namespace: test
+spec:
+  rules:
+  - host: test.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: test-service
+          servicePort: 80 #port of service
