@@ -1,0 +1,61 @@
+pipeline { 
+    agent any
+        tools {
+        maven 'mvn'
+    }
+
+    environment {
+       JAVA_VERSION  = "jdk11"
+       BUILD_COMMAND = "/usr/local/bin/mvn clean install -DskipTests"
+   }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/waseemahammed/spring-petclinic.git']]])
+
+            }
+        }
+        stage("Build"){
+            steps{
+                echo "Running build automation"
+                script{
+                    //sh "./mvnw package"
+                    //sh "java -jar target/*.jar"
+                    sh "/usr/local/bin/mvn clean install -DskipTests"
+                }
+            }
+        }
+        stage("Load K8s manifest"){
+            steps{
+                writeFile(file:'kube.yaml', text:('kube.yaml'))
+            }
+        }
+        stage("Build docker image and Push to repo"){
+            environment {
+                DOCKER_IMAGE_NAME = "waseemahammed/codepairing"
+                registryCredential = 'docker-hub-waseem'
+            }
+            steps{
+                script{
+                   app = docker.build DOCKER_IMAGE_NAME + ":" + "$BUILD_NUMBER"
+                    docker.withRegistry('',registryCredential){
+                    app.push()
+                    }
+                }
+            }
+        }
+        stage("Deploy to K8s"){
+            environment{
+                DOCKER_IMAGE_NAME = "waseemahammed/codepairing"
+                IMAGE_TAG = "${env.BUILD_NUMBER}"
+            }
+            steps{
+                script{
+                kubernetesDeploy(kubeconfigId: 'kubeconfig',
+                 configs: 'kube.yaml')
+                }
+            }
+        }
+    }
+}
